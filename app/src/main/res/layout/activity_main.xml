@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:background="@color/black">
+
+    <TextView
+        android:id="@+id/welcome_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="GET STARTED"
+        android:textAlignment="center"
+        android:fontFamily="@font/touhou98"
+        android:textColor="#658AFF"
+        android:textSize="56sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="64dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/open_midi_btn_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:layout_marginBottom="64dp"
+            android:orientation="horizontal"
+            android:onClick="onOpenMidiClicked">
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="match_parent"
+                android:background="#658AFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" Open MIDI"
+                android:fontFamily="@font/pc98"
+                android:textColor="#658AFF"
+                android:textSize="48sp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/open_pmd_btn_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:layout_marginBottom="64dp"
+            android:orientation="horizontal"
+            android:onClick="onOpenPmdClicked"
+            android:visibility="invisible">
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="match_parent"
+                android:background="#658AFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" Open PMD"
+                android:fontFamily="@font/pc98"
+                android:textColor="#658AFF"
+                android:textSize="48sp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/open_mml_btn_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:layout_marginBottom="64dp"
+            android:orientation="horizontal"
+            android:onClick="onOpenMmlClicked"
+            android:visibility="invisible">
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="match_parent"
+                android:background="#658AFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" Open MML"
+                android:fontFamily="@font/pc98"
+                android:textColor="#658AFF"
+                android:textSize="48sp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/settings_btn_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:layout_marginBottom="64dp"
+            android:orientation="horizontal"
+            android:onClick="onOpenSettingsClicked"
+            android:visibility="invisible">
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="match_parent"
+                android:background="#658AFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" Settings"
+                android:fontFamily="@font/pc98"
+                android:textColor="#658AFF"
+                android:textSize="48sp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/about_btn_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:orientation="horizontal"
+            android:onClick="onOpenAboutClicked"
+            android:visibility="invisible">
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="match_parent"
+                android:background="#658AFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" About"
+                android:fontFamily="@font/pc98"
+                android:textColor="#658AFF"
+                android:textSize="48sp"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
