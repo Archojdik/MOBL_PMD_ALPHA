@@ -3,6 +3,7 @@ package com.example.mobl_pmd;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.os.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,18 +24,13 @@ import kotlin.NotImplementedError;
 // Использует внутренний статический синтезатор. По этой причине класс статический
 public class MidiPlayerFast {
     private static final int SAMPLE_RATE = 96000;
-    private static final int BUFFER_LENGTH = 9600; // 100 мс
-    public static final String GET_NOTES_KEY = "pressed_notes";
-    private final String[] NOTES = new String[] {"C-", "C#", "D-", "D#", "E-", "F-", "F#", "G-", "G#", "A-", "A#", "B-"};
-
-    private static MusicVisualizer musicVisualizer;
+    private static final int BUFFER_LENGTH = 9600 * 2; // Размер звукового буфера в байтах
 
     private static Sequence sequence;
     private static Track[] tracks;
     private static int[] trackIndexes;
     private static PlayingThread playingThread;
 
-    private static long currentTick = 0;
     private static int ticksPerMeasure = 192;
     private static int BPM = 120; // Количество четвертных нот в минуту?
 
@@ -44,12 +40,12 @@ public class MidiPlayerFast {
 
     private static boolean isInited;
 
-    public static void init(MusicVisualizer visualizer) throws MidiUnavailableException {
+    public static void init() throws MidiUnavailableException {
         if (!isInited) {
-            musicVisualizer = visualizer;
-
             OPNSynthesizer.init(SAMPLE_RATE);
-            playingThread = new PlayingThread(SAMPLE_RATE, BUFFER_LENGTH);
+            SoundPlayingHandler.init();
+            VisualizingHandler.init();
+            playingThread = new PlayingThread();
             playingThread.start();
 
             isInited = true;
@@ -67,28 +63,35 @@ public class MidiPlayerFast {
         BPM = 120;
         ticksPerMeasure = 4 * sequence.getResolution();
 
-        musicVisualizer.load(sequence);
-
         isLoaded = true;
+        stop();
     }
-    public static boolean getIsLoaded() {
-        return isLoaded;
-    }
+
+    public static boolean getIsLoaded() { return isLoaded; }
+    public static boolean getIsPlaying() { return isPlaying; }
+    public static boolean getIsFinished() { return isFinished; }
+
     public static void play() throws InvalidMidiDataException, NotInitializedException {
         if (!isInited)
             throw new NotInitializedException();
         if (!isLoaded)
             throw new InvalidMidiDataException("Midi data is not loaded.");
-
-        isPlaying = true;
-        musicVisualizer.play();
+        if (isPlaying)
+            return;
 
         if (isFinished) {
             OPNSynthesizer.releaseAll();
+
             Arrays.fill(trackIndexes, 0);
-            currentTick = 0;
+            playingThread.startPlayback(true);
             isFinished = false;
         }
+        else {
+            playingThread.startPlayback(false);
+        }
+
+        VisualizingHandler.showPlay();
+        isPlaying = true;
     }
     public static void pause() throws InvalidMidiDataException, NotInitializedException {
         if (!isInited)
@@ -96,8 +99,8 @@ public class MidiPlayerFast {
         if (!isLoaded)
             throw new InvalidMidiDataException("Midi data is not loaded.");
 
+        VisualizingHandler.showPause();
         isPlaying = false;
-        musicVisualizer.pause();
     }
     public static void stop() throws InvalidMidiDataException, NotInitializedException {
         if (!isInited)
@@ -106,9 +109,9 @@ public class MidiPlayerFast {
             throw new InvalidMidiDataException("Midi data is not loaded.");
 
         OPNSynthesizer.releaseAll();
+        VisualizingHandler.showPause();
         isPlaying = false;
         isFinished = true;
-        musicVisualizer.stop();
     }
     public static void panic() {
         throw new NotImplementedError();
@@ -143,7 +146,7 @@ public class MidiPlayerFast {
 
         return closestEvent;
     }
-    private static void handleEvent(MidiEvent event) {
+    private static void handleEvent(MidiEvent event, long currentTick) {
         MidiMessage msg = event.getMessage();
         if (msg instanceof MetaMessage) {
             MetaMessage metaMsg = (MetaMessage) msg;
@@ -152,7 +155,7 @@ public class MidiPlayerFast {
                 int tempo = (data[0] & 0xff) << 16 | (data[1] & 0xff) << 8 | (data[2] & 0xff);
                 BPM = 60000000 / tempo;
             }
-            if (metaMsg.getType() == MetaMessage.TYPE_END_OF_TRACK && currentTick == sequence.getTickLength()) {
+            if (metaMsg.getType() == MetaMessage.TYPE_END_OF_TRACK && currentTick >= sequence.getTickLength()) {
                 isPlaying = false;
                 isFinished = true;
             }
@@ -181,55 +184,31 @@ public class MidiPlayerFast {
         catch (NotInitializedException ignored) {}
     }
 
-    private static class PlayingThread extends Thread {
-        private final AudioTrack audioTrack;
-        private boolean isRunning = true;
-        private final short[] audioBuffer;
 
-        public PlayingThread(int sampleRate, int bufferLength) {
-            this.audioBuffer = new short[bufferLength];
+    private static class SoundPlayingHandler {
+        private static AudioTrack audioTrack;
+        private static short[] audioBuffer;
 
-            this.audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                    sampleRate, AudioFormat.CHANNEL_OUT_MONO,
-                    AudioFormat.ENCODING_PCM_16BIT, bufferLength * 4,
+        protected static void init() {
+            audioBuffer = new short[SAMPLE_RATE];
+
+            audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                    SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT, BUFFER_LENGTH,
                     AudioTrack.MODE_STREAM);
         }
-        @Override
-        public void run() {
+        protected static void play() {
             audioTrack.play();
-
-            while (isRunning) {
-                if (isPlaying) {
-                    // Берём следующее событие
-                    MidiEvent closestEvent = nextEvent();
-                    if (closestEvent == null)
-                        continue;
-                    if (closestEvent == null)
-                        throw new NullPointerException();
-
-                    // Скипаем и заполняем буфер до следующего события
-                    // Просчитать нужное количество семплов
-                    long deltaTick = closestEvent.getTick() - currentTick;
-                    int ticksInMinute = ticksPerMeasure * BPM / 4; // / 4;
-                    int nsamples = (int)(SAMPLE_RATE * 60 * deltaTick / ticksInMinute);
-                    readNext(nsamples);
-                    currentTick = closestEvent.getTick();
-
-                    // Выполняем команду
-                    handleEvent(closestEvent);
-                } else {
-                    // Работаем по инерции
-                    readNext(audioBuffer.length);
-                }
-            }
-
+        }
+        protected static void stop() {
             audioTrack.stop();
         }
-        public void safeStop() {
-            isRunning = false;
+        protected static void update(long deltaTicks) {
+            int ticksInMinute = ticksPerMeasure * BPM / 4;
+            int nsamples = (int)(SAMPLE_RATE * 60 * deltaTicks / ticksInMinute);
+            readNext(nsamples);
         }
-
-        private void readNext(int nsamples) {
+        protected static void readNext(int nsamples) {
             try {
                 int samplesLeft = nsamples;
                 for (; samplesLeft > audioBuffer.length; samplesLeft -= audioBuffer.length) {
@@ -242,6 +221,195 @@ public class MidiPlayerFast {
                     audioTrack.write(audioBuffer, 0, samplesLeft);
                 }
             } catch (NotInitializedException ignored) { }
+        }
+    }
+    public static class VisualizingHandler {
+        private static ChannelVisualFragment.ChannelVisualHandler[] channelVisualHandlers = new ChannelVisualFragment.ChannelVisualHandler[16];
+        private static PlayButtonFragment.PlayButtonHandler playButtonHandler;
+
+        protected static void init() {
+
+        }
+        protected static void update(long deltaTicks) {
+
+        }
+        protected static void showEvent(MidiEvent event) {
+            MidiMessage msg = event.getMessage();
+            if (msg instanceof MetaMessage) {
+                MetaMessage metaMsg = (MetaMessage) msg;
+                if (metaMsg.getType() == MetaMessage.TYPE_TEMPO) {
+                    byte[] data = metaMsg.getData();
+                    int tempo = (data[0] & 0xff) << 16 | (data[1] & 0xff) << 8 | (data[2] & 0xff);
+                    BPM = 60000000 / tempo;
+                }
+                // Конец одной из дорожек (не всей песни)
+                /*if (metaMsg.getType() == MetaMessage.TYPE_END_OF_TRACK && currentTick > sequence.getTickLength()) {
+                    isPlaying = false;
+                    isFinished = true;
+                }*/
+                return;
+            }
+
+            byte[] message = event.getMessage().getMessage();
+            byte status = message[0];
+
+            int command = status & 0xf0;
+            int channel = status & 0x0f;
+
+            Message handlerMsg = new Message();
+            switch (command) {
+                case ShortMessage.NOTE_OFF:
+                    handlerMsg.arg1 = ChannelVisualFragment.ChannelVisualHandler.ARG1_RELEASE;
+                    handlerMsg.arg2 = message[1];
+                    if (channelVisualHandlers[channel] != null)
+                        channelVisualHandlers[channel].sendMessage(handlerMsg);
+                    break;
+                case ShortMessage.NOTE_ON:
+                    handlerMsg.arg1 = ChannelVisualFragment.ChannelVisualHandler.ARG1_ATTACK;
+                    handlerMsg.arg2 = message[1];
+                    if (channelVisualHandlers[channel] != null)
+                        channelVisualHandlers[channel].sendMessage(handlerMsg);
+                    break;
+                case ShortMessage.PROGRAM_CHANGE:
+                    handlerMsg.arg1 = ChannelVisualFragment.ChannelVisualHandler.ARG1_SET_TN;
+                    handlerMsg.arg2 = message[1];
+                    if (channelVisualHandlers[channel] != null)
+                        channelVisualHandlers[channel].sendMessage(handlerMsg);
+                    break;
+            }
+        }
+        public static void showPlay() {
+            if (playButtonHandler != null) {
+                Message msg = new Message();
+                msg.arg1 = PlayButtonFragment.PlayButtonHandler.SET_PLAYING_ARG1;
+                playButtonHandler.sendMessage(msg);
+            }
+        }
+        protected static void showPause() {
+            if (playButtonHandler != null) {
+                Message msg = new Message();
+                msg.arg1 = PlayButtonFragment.PlayButtonHandler.SET_PAUSED_ARG1;
+                playButtonHandler.sendMessage(msg);
+            }
+        }
+        protected static void requestRedraw() {
+            for (ChannelVisualFragment.ChannelVisualHandler channelVisualHandler : channelVisualHandlers) {
+                if (channelVisualHandler == null)
+                    continue;
+                Message msg = new Message();
+                msg.arg1 = ChannelVisualFragment.ChannelVisualHandler.ARG1_REDRAW;
+                channelVisualHandler.sendMessage(msg);
+            }
+        }
+
+        public static void addFragmentHandler(int channelIndex, ChannelVisualFragment.ChannelVisualHandler handler) {
+            channelVisualHandlers[channelIndex] = handler;
+        }
+        public static void setPlayButtonHandler(PlayButtonFragment.PlayButtonHandler handler) {
+            playButtonHandler = handler;
+        }
+    }
+
+
+    private static class PlayingThread extends Thread {
+        private static final long NANOS_IN_MINUTE = 60000000000L;
+
+        private boolean isRunning = true;
+        private MidiEvent nextEvent;
+        private long onpauseTickValue;
+        public long currentTick;
+        public long playingStartTimeNanos;
+        public long lastAudioUpdateTick;
+
+        private final Object timerSemaphore = "Bluh-bluh-bluh";
+
+        public void startPlayback(boolean restart) {
+            synchronized (timerSemaphore) {
+                if (restart)
+                {
+                    onpauseTickValue = 0;
+                    nextEvent = null;
+                }
+                else
+                    onpauseTickValue = getPlaybackTicks();
+                currentTick = 0;
+
+                playingStartTimeNanos = System.nanoTime();
+                lastAudioUpdateTick = getPlaybackTicks();
+            }
+        }
+        public long getPlaybackTicks() {
+            return currentTick + onpauseTickValue;
+        }
+
+        @Override
+        public void run() {
+            SoundPlayingHandler.play();
+            setPriority(Thread.MAX_PRIORITY);
+
+            while (isRunning) {
+                if (isPlaying) {
+                    // # Новый алгоритм воспроизведения:
+                    // Берём событие
+                    // Сверяем с текущими тактами
+                    // Если событие должно произойти сейчас,
+                        // Выполняем событие
+                        // Обновляем визуализаторы
+                        // Берём следующее событие
+                        // Если оно уже происходит или происходило, повторить
+                    // Заполняем звуковой буфер на пройденное количество тактов
+
+
+                    if (nextEvent == null) {
+                        nextEvent = nextEvent();
+                        if (nextEvent == null) {
+                            // @TODO: Thread.sleep(...);
+                            continue;
+                        }
+                    }
+
+                    synchronized (timerSemaphore) {
+                        // Подсчитываем такты
+                        long nanosFromStart = System.nanoTime() - playingStartTimeNanos;
+                        long currentTick = (ticksPerMeasure * BPM / 4) * nanosFromStart / NANOS_IN_MINUTE;
+                        long deltaTick = currentTick - this.currentTick;
+                        this.currentTick = currentTick;
+
+                        while (getPlaybackTicks() >= nextEvent.getTick()) {
+                            // Обновляем аудиобуфер до нужного количества тактов
+                            // @TODO: (Пока не проиграют все предыдущие такты, пауза не настанет.) Дописать обработку паузы и остановки
+                            // (Именно поэтому после паузы повторная пауза требует задержки)
+                            // (Зато имеется большая точность во времени проигрывания ноты)
+                            if (nextEvent.getTick() > lastAudioUpdateTick)
+                                SoundPlayingHandler.update(nextEvent.getTick() - lastAudioUpdateTick);
+                            lastAudioUpdateTick = nextEvent.getTick();
+
+                            handleEvent(nextEvent, getPlaybackTicks());
+                            VisualizingHandler.showEvent(nextEvent);
+
+                            nextEvent = nextEvent();
+                            if (nextEvent == null)
+                                break;
+                        }
+
+                        // Обновляем аудиобуфер до текущего количества тактов
+                        // Также перерисовываем все пианино
+                        if (getPlaybackTicks() > lastAudioUpdateTick)
+                            SoundPlayingHandler.update(getPlaybackTicks() - lastAudioUpdateTick);
+                        lastAudioUpdateTick = getPlaybackTicks();
+                        VisualizingHandler.requestRedraw();
+                    }
+                } else {
+                    // Работаем по инерции
+                    // @TODO: как-то переделать.
+                    SoundPlayingHandler.readNext(BUFFER_LENGTH);
+                }
+            }
+
+            SoundPlayingHandler.stop();
+        }
+        public void safeStop() {
+            isRunning = false;
         }
     }
 }

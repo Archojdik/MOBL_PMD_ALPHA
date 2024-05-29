@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ChannelVisualFragment"
+    android:orientation="vertical">
+
+    <!-- @TODO: убрать лишние привязки -->
+
+    <LinearLayout
+        android:id="@+id/channel_data_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/piano_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_weight="1">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/fragment_channel_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/fmdsp"
+                android:text="FM1"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/fmdsp"
+                android:text="TRACK."
+                android:textSize="18sp"
+                android:textColor="#AAAA99"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="KN:"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+                <TextView
+                    android:id="@+id/kn_field"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text=" S "
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="VL:"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+                <TextView
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="128"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+
+                <!--
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="DT:"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text=" 000"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+                    -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="TN:"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+                <TextView
+                    android:id="@+id/tn_field"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="000"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+
+                <!--
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="GT:"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="000"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="M:"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/fmdsp"
+                    android:text="********"
+                    android:textSize="18sp"
+                    android:textColor="#AAAA99"/>
+                    -->
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.example.mobl_pmd.PianoVisualView
+        android:id="@+id/piano_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/channel_data_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_weight="1"/>
+
+</LinearLayout>
