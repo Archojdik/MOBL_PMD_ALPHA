@@ -16,35 +16,51 @@
         <FrameLayout
             android:id="@+id/fm1_fragment_frame"
             android:layout_width="match_parent"
-            android:layout_height="72dp"/>
+            android:layout_height="wrap_content"/>
         <FrameLayout
             android:id="@+id/fm2_fragment_frame"
             android:layout_width="match_parent"
-            android:layout_height="72dp"/>
+            android:layout_height="wrap_content"/>
         <FrameLayout
             android:id="@+id/fm3_fragment_frame"
             android:layout_width="match_parent"
-            android:layout_height="72dp"/>
+            android:layout_height="wrap_content"/>
         <FrameLayout
             android:id="@+id/fm4_fragment_frame"
             android:layout_width="match_parent"
-            android:layout_height="72dp"/>
+            android:layout_height="wrap_content"/>
         <FrameLayout
             android:id="@+id/fm5_fragment_frame"
             android:layout_width="match_parent"
-            android:layout_height="72dp"/>
+            android:layout_height="wrap_content"/>
         <FrameLayout
             android:id="@+id/fm6_fragment_frame"
             android:layout_width="match_parent"
-            android:layout_height="72dp"/>
+            android:layout_height="wrap_content"/>
         <FrameLayout
             android:id="@+id/fm7_fragment_frame"
             android:layout_width="match_parent"
-            android:layout_height="72dp"/>
+            android:layout_height="wrap_content"/>
         <FrameLayout
             android:id="@+id/fm8_fragment_frame"
             android:layout_width="match_parent"
-            android:layout_height="72dp"/>
+            android:layout_height="wrap_content"/>
+        <FrameLayout
+            android:id="@+id/fm9_fragment_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <FrameLayout
+            android:id="@+id/fm10_fragment_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <FrameLayout
+            android:id="@+id/fm11_fragment_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <FrameLayout
+            android:id="@+id/fm12_fragment_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -21,13 +21,14 @@ public class ChannelVisualFragment extends Fragment {
     private TextView channelName;
     private TextView knField;
     private TextView tnView;
+    private TextView vlView;
     private PianoVisualView pianoVisual;
 
     private int currentKey = -1;
-    private int currentTN = 101;
+    private int currentTN = 999;
+    private int currentVL = 0;
 
     public ChannelVisualFragment() {
-        // Required empty public constructor
         super(R.layout.fragment_channel_visual);
 
         // Получаем номер канала и запоминаем его.
@@ -48,6 +49,7 @@ public class ChannelVisualFragment extends Fragment {
         pianoVisual = view.findViewById(R.id.piano_view);
         knField = view.findViewById(R.id.kn_field);
         tnView = view.findViewById(R.id.tn_field);
+        vlView = view.findViewById(R.id.vl_field);
 
         channelName.setText("FM" + chNum);
         channelName.setTextColor(Color.rgb(0x66, 0x88, 0xFF));
@@ -65,6 +67,7 @@ public class ChannelVisualFragment extends Fragment {
         public static final int ARG1_RELEASE = 2;
         public static final int ARG1_REDRAW = 3;
         public static final int ARG1_SET_TN = 4;
+        public static final int ARG1_SET_VL = 5;
 
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -99,14 +102,23 @@ public class ChannelVisualFragment extends Fragment {
                         knField.setText("o" + oct + keyNames[knm]);
                     }
 
-                    StringBuilder tnStr = new StringBuilder();
-                    tnStr.append(currentTN);
-                    while (tnStr.length() < 3)
-                        tnStr.insert(0, '0');
-                    tnView.setText(tnStr.toString());
+                    StringBuilder numStr = new StringBuilder();
+                    numStr.append(currentTN);
+                    while (numStr.length() < 3)
+                        numStr.insert(0, '0');
+                    tnView.setText(numStr.toString());
+
+                    numStr = new StringBuilder();
+                    numStr.append(currentVL);
+                    while (numStr.length() < 3)
+                        numStr.insert(0, '0');
+                    vlView.setText(numStr.toString());
                     break;
                 case ARG1_SET_TN:
                     currentTN = msg.arg2;
+                    break;
+                case ARG1_SET_VL:
+                    currentVL = msg.arg2;
                     break;
             }
             super.handleMessage(msg);

@@ -61,6 +61,22 @@ public class PlayerActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fm8_fragment_frame, ChannelVisualFragment.class, null)
                     .commit();
+            channelFragmentChNum = 9;
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fm9_fragment_frame, ChannelVisualFragment.class, null)
+                    .commit();
+            channelFragmentChNum = 10;
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fm10_fragment_frame, ChannelVisualFragment.class, null)
+                    .commit();
+            channelFragmentChNum = 11;
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fm11_fragment_frame, ChannelVisualFragment.class, null)
+                    .commit();
+            channelFragmentChNum = 12;
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fm12_fragment_frame, ChannelVisualFragment.class, null)
+                    .commit();
         }
 
         Resources rs = getResources();

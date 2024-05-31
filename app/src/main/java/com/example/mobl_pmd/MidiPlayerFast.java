@@ -267,8 +267,13 @@ public class MidiPlayerFast {
                 case ShortMessage.NOTE_ON:
                     handlerMsg.arg1 = ChannelVisualFragment.ChannelVisualHandler.ARG1_ATTACK;
                     handlerMsg.arg2 = message[1];
-                    if (channelVisualHandlers[channel] != null)
+                    Message setVolMsg = new Message();
+                    setVolMsg.arg1 = ChannelVisualFragment.ChannelVisualHandler.ARG1_SET_VL;
+                    setVolMsg.arg2 = message[2];
+                    if (channelVisualHandlers[channel] != null) {
                         channelVisualHandlers[channel].sendMessage(handlerMsg);
+                        channelVisualHandlers[channel].sendMessage(setVolMsg);
+                    }
                     break;
                 case ShortMessage.PROGRAM_CHANGE:
                     handlerMsg.arg1 = ChannelVisualFragment.ChannelVisualHandler.ARG1_SET_TN;
