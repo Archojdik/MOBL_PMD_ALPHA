@@ -92,7 +92,6 @@ public class PlayerActivity extends AppCompatActivity {
 
         //createNotification();
 
-
         if (getIntent().hasExtra(MUSIC_FILE_PATH_PASS_CODE)) {
             String musicFilePath = getIntent().getStringExtra(MUSIC_FILE_PATH_PASS_CODE);
             try {

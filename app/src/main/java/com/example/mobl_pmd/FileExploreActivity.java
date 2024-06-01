@@ -22,7 +22,6 @@ import java.util.List;
 public class FileExploreActivity extends AppCompatActivity {
     public static final String FILE_EXTENSION_PASS_CODE = "file_extension";
 
-    //private String[] allowedExtensions;
     private List<String> allowedExtensions;
 
     private ArrayList<File> subdirs = new ArrayList<>();

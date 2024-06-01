@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private void requestPermissionSettings() {
         // Открываем настройки разрешений приложения, чтобы пользователь сам нажал "разрешить"
         // (На моём телефоне по умолчанию наглухо запрещается использовать хранилище)
-        Toast.makeText(this, "YOU ARE NOT PERMITTED!", Toast.LENGTH_SHORT).show(); // @TODO: Человеческую просьбу отдать телефон в наши руки
+        Toast.makeText(this, "РАЗРЕШИ МНЕ ЧИТАТЬ ТВОЁ ХРАНИЛИЩЕ!!", Toast.LENGTH_SHORT).show(); // @TODO: Человеческую просьбу отдать телефон в наши руки
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getPackageName(), null));
         ContextCompat.startActivity(this, intent, null);
     }
